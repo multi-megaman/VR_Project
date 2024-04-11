@@ -8,6 +8,9 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      zIndex: {
+        'inf': '999999'
+      },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":
@@ -27,7 +30,7 @@ const config: Config = {
         },
       },
       animation: {
-        slowSlide: "slowSlide 180s linear infinite",
+        slowSlide: "slowSlide 240s linear infinite",
       },
     },
   },

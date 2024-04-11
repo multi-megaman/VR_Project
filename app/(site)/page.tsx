@@ -4,7 +4,7 @@ import VRDiv from "./components/VRDiv";
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen h-screen flex-col items-center p-4 z-10 overflow-hidden">
+    <main className="flex w-screen h-screen flex-col items-center p-4 z-10 overflow-hidden">
       <Background image="star.png" />
 
       <h1 className="flex flex-col items-center font-extrabold text-2xl drop-shadow-xl backdrop-blur-xl">

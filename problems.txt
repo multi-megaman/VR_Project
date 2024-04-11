@@ -1,0 +1,8 @@
+Import trace for requested module:
+    fix: https://github.com/vercel/next.js/discussions/61968 (run the "npm run dev" command on the windows prompt instead of powershell)
+    or
+    fix: https://github.com/vercel/next.js/discussions/49432 (run "npm i -D encoding")
+
+
+Error: EPERM: operation not permitted, open 'C:\...."
+    fix: npm cache clean --force
