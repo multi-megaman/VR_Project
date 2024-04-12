@@ -5,38 +5,41 @@ import * as THREE from "three"; // Import the 'three' package
 
 export function Floor() {
   return (
-    <Object3D position={[0, -1, 0]} repTex={repTex(4,4)}>
+    <Object3D
+      position={[0, -1, 0]}
+      repTex={repTex(4, 4)}
+      objArgs={[20, 1, 20]}
+      unaffected
+    >
       <boxGeometry args={[20, 1, 20]} />
     </Object3D>
   );
 }
 
-export function ChicaCube() {
+export function Cube({ ...props }) {
   return (
-    <Object3D position={[1.2, 2, -3]} textureUrl="chica.webp">
+    <Object3D
+      position={[1.2, 3, -3]}
+      textureUrl="chica.webp"
+      objArgs={[1, 1, 1]}
+      {...props}
+    >
       <boxGeometry args={[1, 1, 1]} />
     </Object3D>
   );
 }
 
-export function BonnieSphere() {
+
+interface LightProps {
+  position: number[];
+}
+export function VisiblePointLight({ position }: LightProps, { ...props }) {
+  const pos = new THREE.Vector3(...position);
   return (
-    <Object3D position={[-1.2, 2, -3]} textureUrl="bonnie.jpg"  repTex={repTex(2,2)} rotation={[1,0.2,0]}>
-      <sphereGeometry args={[0.7, 10, 10]} />
+    <Object3D position={[0, 2, -3]} objArgs={[20, 1, 20]}>
+      <pointLight decay={0} intensity={Math.PI / 2} position={pos} {...props} />
+      <sphereGeometry args={[0.1, 16, 16]} />
+      <meshBasicMaterial color="yellow" />
     </Object3D>
   );
 }
-
-interface LightProps {
-    position: number[];
-}
-export function VisiblePointLight({ position }: LightProps) {
-    const pos = new THREE.Vector3(...position);
-    return (
-      <Object3D position={pos}>
-        <pointLight decay={0} intensity={Math.PI/2} position={pos}/>
-        <sphereGeometry args={[0.1, 16, 16]} />
-        <meshBasicMaterial color="yellow" />
-      </Object3D>
-    );
-  }
