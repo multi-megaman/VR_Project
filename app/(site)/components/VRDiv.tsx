@@ -41,7 +41,7 @@ const VRDiv: React.FC = () => {
       <VRExperience />
     </div>
     : 
-    <div className="border-4 border-gray-300 rounded-xl bg-cyan-800 w-5/6 h-5/6">
+    <div className="border-4 border-gray-300 rounded-xl bg-cyan-800 w-3/6 h-3/6">
     </div> 
     )}
     </div>
