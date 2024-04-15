@@ -10,8 +10,12 @@ import {
   NormalBufferAttributes,
   Material,
   Object3DEventMap,
+  Texture,
+  Vector3,
 } from "three";
 import { useBox } from "@react-three/cannon";
+import { useEffect, useState } from "react";
+import { useFrame } from "react-three-fiber";
 
 interface Object3DProps extends MeshProps {
   textureUrl?: string;
@@ -21,21 +25,26 @@ interface Object3DProps extends MeshProps {
   unaffected?: boolean;
 }
 
-function Object3D({
+const Object3D = ({
   textureUrl = "default.png",
   repTex = new Vector2(1, 1),
   objArgs = [1, 1, 1],
   unaffected = false,
   children,
   ...rest
-}: Object3DProps) {
-  const texture = useLoader(TextureLoader, textureUrl);
+}: Object3DProps) => {
+  const [texture, setTexture] = useState<Texture | null>(null);
+  const [material, setMaterial] = useState<Material | null>(null);
 
-  texture.wrapS = RepeatWrapping;
-  texture.wrapT = RepeatWrapping;
-  texture.repeat.copy(repTex);
+  useEffect(() => {
+    var tempTexture = new TextureLoader().load(textureUrl);
+    tempTexture.wrapS = RepeatWrapping;
+    tempTexture.wrapT = RepeatWrapping;
+    tempTexture.repeat.copy(repTex);
+    setMaterial(new MeshPhongMaterial({ map: tempTexture }));
+    console.log("Texture loaded" + tempTexture.repeat.x);
+  }, []);
 
-  const material = new MeshPhongMaterial({ map: texture });
 
   const objPos = rest.position as [number, number, number];
 
@@ -45,9 +54,10 @@ function Object3D({
     position: objPos,
     friction: 0,
     args: objArgs,
-  }));
-
-  console.log(repTex);
+  }))
+  const meshPos = ref?.current?.getWorldPosition(new Vector3()) || new Vector3(0,0,0);
+  api.position.set(meshPos.x, meshPos.y, meshPos.z)
+  
   return (
     <mesh
       ref={
@@ -59,7 +69,7 @@ function Object3D({
           >
         >
       }
-      material={material}
+      material={material || undefined}
       {...rest}
       castShadow
       receiveShadow
