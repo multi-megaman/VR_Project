@@ -42,7 +42,6 @@ const Object3D = ({
     tempTexture.wrapT = RepeatWrapping;
     tempTexture.repeat.copy(repTex);
     setMaterial(new MeshPhongMaterial({ map: tempTexture }));
-    console.log("Texture loaded" + tempTexture.repeat.x);
   }, []);
 
 

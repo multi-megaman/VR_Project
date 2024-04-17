@@ -46,9 +46,7 @@ const VRExperience: React.FC = () => {
             <Floor />
             {/* <Cube args={[3, 3, 3]} position={[0, 4, -6]} />
             <Cube args={[2, 2, 2]} position={[0, 8, -6.8]} /> */}
-            <Robot>
-              <Cube args={[0.75, 0.75, 0.75]} position={[0, 4, -3]} textureUrl="robot.webp"/>
-            </Robot>
+            <Robot/>
             
             <Table position={[0, 0, -4]} />
             {/* </Object3D> */}
