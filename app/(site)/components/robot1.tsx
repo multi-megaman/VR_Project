@@ -1,6 +1,7 @@
 import { useFrame } from "@react-three/fiber";
 import {
   ArrowHelper,
+  Mesh,
   Quaternion,
   Raycaster,
   TextureLoader,
@@ -8,10 +9,27 @@ import {
 } from "three";
 import { useBox } from "@react-three/cannon";
 import { useXR } from "@react-three/xr";
-import Object3D from "@/app/components/Object3D";
-import { useState } from "react";
+import { useGLTF } from '@react-three/drei';
+import { useMemo, useState } from "react";
+import { useLoader } from "react-three-fiber";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+
+
+
 
 const Robot = ({ children, ...props }: any) => {
+  const { scene } = useLoader(GLTFLoader, "models/robot/scene.gltf");
+  const model = useMemo(() => {
+      const clonedScene = scene.clone();
+      clonedScene.traverse((node) => {
+        if (node instanceof Mesh) {
+          node.castShadow = true;
+          node.receiveShadow = true;
+        }
+      });
+      return clonedScene;
+    }, [scene]);
+
   const [holdingCube, setHoldingCube] = useState(false);
   const arrowHelper = new ArrowHelper(
     new Vector3(1, 0, 0),
@@ -63,39 +81,50 @@ const Robot = ({ children, ...props }: any) => {
       arrowHelper.setDirection(raycaster.ray.direction);
       arrowHelper.position.copy(raycaster.ray.origin);
 
-      if (ref.current) {
-        const intersects = raycaster.intersectObject(ref.current, true);
-        if ((intersects.length > 0 || holdingCube) && triggerPressed) {
-          setHoldingCube(true);
-          // Get the position and rotation of the controller
-          const controllerPosition = new Vector3();
-          const controllerQuaternion = new Quaternion();
-          controller.controller.getWorldPosition(controllerPosition);
-          controller.controller.getWorldQuaternion(controllerQuaternion);
+      const handleCubeInteraction = (controller: any, triggerPressed: boolean) => {
+        if (ref.current) {
+          const intersects = raycaster.intersectObject(ref.current, true);
       
-          // Set the position and rotation of the robot to match the controller
-          api.position.set(controllerPosition.x, controllerPosition.y, controllerPosition.z);
-          api.rotation.set(controllerQuaternion.x, controllerQuaternion.y, controllerQuaternion.z);
-      
-          api.velocity.set(0, 0, 0); // Set velocity to zero
-          api.mass.set(0); // Set mass to zero
-        }
-        else {
-          if (!triggerPressed) {
-            setHoldingCube(false);
+          if ((intersects.length > 0 || holdingCube) && triggerPressed) {
+            setHoldingCube(true);
+            const controllerPosition = new Vector3();
+            const controllerQuaternion = new Quaternion();
+            controller.controller.getWorldPosition(controllerPosition);
+            controller.controller.getWorldQuaternion(controllerQuaternion);
+          
+            //ADJUSTMENT FOR THE CUBE ROTATION IN COMPARASION TO THE CONTROLLER
+            // Get the current rotation of the cube
+            const cubeQuaternion = ref.current.quaternion;
+            // Ensure the quaternion of the cube stays close to the quaternion of the controller
+            if (controllerQuaternion.dot(cubeQuaternion) < 0) {
+              controllerQuaternion.set(-controllerQuaternion.x, -controllerQuaternion.y, -controllerQuaternion.z, -controllerQuaternion.w);
+            }
+
+            api.position.set(controllerPosition.x, controllerPosition.y, controllerPosition.z);
+            api.rotation.set(controllerQuaternion.x, controllerQuaternion.y, controllerQuaternion.z);
+
+            api.velocity.set(0, 0, 0);
+            api.mass.set(0);
           }
-          api.mass.set(1); // Set mass back to 1
+          else {
+            if (!triggerPressed) {
+              setHoldingCube(false);
+            }
+            api.mass.set(1);
+          }
         }
       }
+      handleCubeInteraction(controller, triggerPressed);
     }
   });
 
   return (
-    <mesh>
+    <mesh castShadow receiveShadow>
       <primitive object={arrowHelper} />
       <mesh ref={ref} {...props}>
-        <boxGeometry args={[0.5,0.5,0.5]} />
-        <meshBasicMaterial attach="material" map={texture} />
+      <primitive object={model} scale={0.07} rotation={[0,-1.5,0]}/>
+      {/* <boxGeometry args={[0.5,0.5,0.5]} />
+        <meshBasicMaterial attach="material" map={texture} /> */}
       </mesh>
     </mesh>
   );

@@ -32,7 +32,7 @@ const VRExperience: React.FC = () => {
             <Controllers />
             <Hands />
 
-            <ambientLight intensity={Math.PI / 2} />
+            <ambientLight intensity={Math.PI / 3} />
             <spotLight
               position={[10, 10, 10]}
               angle={0.15}

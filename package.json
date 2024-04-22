@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@react-three/cannon": "^6.6.0",
+    "@react-three/drei": "^9.105.4",
     "@react-three/xr": "^5.7.1",
     "clsx": "^2.1.0",
     "drei": "^2.2.21",
