@@ -1,9 +1,6 @@
-import { useEffect, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import {
   ArrowHelper,
-  Mesh,
-  MeshBasicMaterial,
   Quaternion,
   Raycaster,
   TextureLoader,
@@ -12,8 +9,10 @@ import {
 import { useBox } from "@react-three/cannon";
 import { useXR } from "@react-three/xr";
 import Object3D from "@/app/components/Object3D";
+import { useState } from "react";
 
 const Robot = ({ children, ...props }: any) => {
+  const [holdingCube, setHoldingCube] = useState(false);
   const arrowHelper = new ArrowHelper(
     new Vector3(1, 0, 0),
     new Vector3(0, 0, 0),
@@ -30,21 +29,10 @@ const Robot = ({ children, ...props }: any) => {
 
   const textureLoader = new TextureLoader();
   const texture = textureLoader.load("robot.webp");
-  const material = new MeshBasicMaterial({ map: texture });
 
   // let gamepad: Gamepad | null | undefined = null;
   let triggerPressed = false;
 
-  // // Listen to the inputsourceschange event
-  // if (session) {
-  //   session.addEventListener('inputsourceschange', (event) => {
-  //     console.log('inputsourceschange event fired', event);
-  //     if (event.added.length > 0) {
-  //       gamepad = event.added[0].gamepad;
-  //       console.log('gamepad set', gamepad);
-  //     }
-  //   });
-  // }
 
   useFrame(() => {
     if (controllers && controllers[0]) {
@@ -77,8 +65,8 @@ const Robot = ({ children, ...props }: any) => {
 
       if (ref.current) {
         const intersects = raycaster.intersectObject(ref.current, true);
-        if (intersects.length > 0 && triggerPressed) {
-      
+        if ((intersects.length > 0 || holdingCube) && triggerPressed) {
+          setHoldingCube(true);
           // Get the position and rotation of the controller
           const controllerPosition = new Vector3();
           const controllerQuaternion = new Quaternion();
@@ -93,6 +81,9 @@ const Robot = ({ children, ...props }: any) => {
           api.mass.set(0); // Set mass to zero
         }
         else {
+          if (!triggerPressed) {
+            setHoldingCube(false);
+          }
           api.mass.set(1); // Set mass back to 1
         }
       }
