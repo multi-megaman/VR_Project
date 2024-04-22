@@ -9,13 +9,21 @@ import {
 } from "three";
 import { useBox } from "@react-three/cannon";
 import { useXR } from "@react-three/xr";
-import { useGLTF } from '@react-three/drei';
-import { useMemo, useState } from "react";
+import { PositionalAudio, useGLTF } from '@react-three/drei';
+import { Suspense, useMemo, useRef, useState } from "react";
 import { useLoader } from "react-three-fiber";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 
+function Sound({url}) {
 
+  const sound: any = useRef();
+  return (
+    <Suspense fallback={null}>
+      <PositionalAudio autoplay url={url} ref={sound} />
+    </Suspense>
+  );
+}
 
 const Robot = ({ children, ...props }: any) => {
   const { scene } = useLoader(GLTFLoader, "models/robot/scene.gltf");
@@ -60,7 +68,6 @@ const Robot = ({ children, ...props }: any) => {
       
       const gamepad = controller.inputSource?.gamepad;
 
-      console.log('useFrame running');
       if (gamepad) {
         triggerPressed = gamepad.buttons[0].pressed;
       }
@@ -123,6 +130,7 @@ const Robot = ({ children, ...props }: any) => {
       <primitive object={arrowHelper} />
       <mesh ref={ref} {...props}>
       <primitive object={model} scale={0.07} rotation={[0,-1.5,0]}/>
+      <Sound url="audio/audio.mp3" />
       {/* <boxGeometry args={[0.5,0.5,0.5]} />
         <meshBasicMaterial attach="material" map={texture} /> */}
       </mesh>
