@@ -14,11 +14,12 @@ import { Suspense, useMemo, useRef, useState } from "react";
 import { useLoader } from "react-three-fiber";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import RobotRefContext from "@/app/context/robotStateContext";
-import CodeBrick, { CodeBrickProps } from "@/app/components/CodeBricks/CodeBrick";
-import { CodeBricksContext } from "@/app/context/codeBricksContext";
 import BrickList from "@/app/components/CodeBricks/BrickList";
 
-function Sound({ url }) {
+interface SoundProps {
+    url: string;
+}
+function Sound({ url }: SoundProps) {
     const sound: any = useRef();
     return (
         <Suspense fallback={null}>
@@ -28,7 +29,7 @@ function Sound({ url }) {
 }
 
 const Robot = ({ children, ...props }: any) => {
-    const { scene } = useLoader(GLTFLoader, "models/robot/scene.gltf");
+    const { scene } = useLoader(GLTFLoader, "models/robot/scene.glb");
 
     const model = useMemo(() => {
         const clonedScene = scene.clone();
@@ -44,24 +45,20 @@ const Robot = ({ children, ...props }: any) => {
 
 
     const [holdingCube, setHoldingCube] = useState(false);
-    const arrowHelper = new ArrowHelper(
-        new Vector3(1, 0, 0),
-        new Vector3(0, 0, 0),
-        5,
-        0xff0000
-    );
+    // const arrowHelper = new ArrowHelper(
+    //     new Vector3(1, 0, 0),
+    //     new Vector3(0, 0, 0),
+    //     5,
+    //     0xff0000
+    // );
     const [ref, api] = useBox(() => ({
         mass: 1,
         position: [0, 4, -3],
-        args: [0.5, 0.5, 0.5],
+        args: [0.55, 0.55, 0.55],
     }));
     const { controllers, session } = useXR();
     const raycaster = new Raycaster();
 
-    // const textureLoader = new TextureLoader();
-    // const texture = textureLoader.load("robot.webp");
-
-    // let gamepad: Gamepad | null | undefined = null;
     let triggerPressed = false;
 
     useFrame(() => {
@@ -90,9 +87,9 @@ const Robot = ({ children, ...props }: any) => {
 
             // Update the raycaster's origin and direction
             raycaster.set(extendedControllerPosition, controllerDirection);
-            // Update the arrow helper to match the ray
-            arrowHelper.setDirection(raycaster.ray.direction);
-            arrowHelper.position.copy(raycaster.ray.origin);
+            // // Update the arrow helper to match the ray
+            // arrowHelper.setDirection(raycaster.ray.direction);
+            // arrowHelper.position.copy(raycaster.ray.origin);
 
             const handleCubeInteraction = (
                 controller: any,
@@ -160,15 +157,15 @@ const Robot = ({ children, ...props }: any) => {
         <RobotRefContext.Provider value={ref}>
             
                 <mesh castShadow receiveShadow>
-                    <primitive object={arrowHelper} />
+                    {/* <primitive object={arrowHelper} /> */}
                     <mesh ref={ref} {...props}>
                         <primitive
                             object={model}
-                            scale={0.07}
-                            rotation={[0, -1.5, 0]}
+                            scale={0.015}
+                            rotation={[0, 0, 0]}
                         />
                         <Sound url="audio/audio.mp3" />
-
+                        {/* <boxGeometry args={[0.5, 0.5, 0.5]} /> */}
                         <BrickList />
                     </mesh>
                 </mesh>

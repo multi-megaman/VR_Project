@@ -46,7 +46,7 @@ export const Cube = ({ args, ...props }: any) => {
 
 export const Table = ({ args, ...props }: any) => {
     return (
-        <Cube unaffected args={[6, 1, 5]} repTex={repTex(2, 2)} textureUrl="wood2.jpg" {...props} />
+        <Cube unaffected args={[6, 2, 5]} repTex={repTex(2, 2)} textureUrl="wood2.jpg" {...props} />
     );
 };
 

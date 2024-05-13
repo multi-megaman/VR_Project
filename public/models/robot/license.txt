@@ -1,11 +1,11 @@
 Model Information:
-* title:	Baby Rigged Robot
-* source:	https://sketchfab.com/3d-models/baby-rigged-robot-e1655eb59cae4b0d940b8adcf3df1c4a
-* author:	teammastergame1 (https://sketchfab.com/teammastergame1)
+* title:	CUBE
+* source:	https://sketchfab.com/3d-models/cube-13568cb7f3374c09967addcc0d120f04
+* author:	小鳥遊ゆうき (https://sketchfab.com/holun122)
 
 Model License:
 * license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
 * requirements:	Author must be credited. Commercial use is allowed.
 
 If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
-This work is based on "Baby Rigged Robot" (https://sketchfab.com/3d-models/baby-rigged-robot-e1655eb59cae4b0d940b8adcf3df1c4a) by teammastergame1 (https://sketchfab.com/teammastergame1) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+This work is based on "CUBE" (https://sketchfab.com/3d-models/cube-13568cb7f3374c09967addcc0d120f04) by 小鳥遊ゆうき (https://sketchfab.com/holun122) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

@@ -20,18 +20,19 @@ const CodeBrick: React.FC<CodeBrickProps> = ({
     execute,
     ...props
 }) => {
-    const { scene } = useLoader(GLTFLoader, "models/codeBrick/scene.gltf");
+    const { scene } = useLoader(GLTFLoader, "models/codeBrick/scene.glb");
     const model = useMemo(() => {
         const clonedScene = scene.clone();
         clonedScene.traverse((node) => {
-            if (node instanceof Mesh) {
-                node.material = new MeshStandardMaterial({ color });
-                node.castShadow = true;
-                node.receiveShadow = true;
+            if (node instanceof Mesh && node.material.name !== "OH_Outline_Material") {
+              node.material = new MeshStandardMaterial({ color });
+              node.castShadow = true;
+              node.receiveShadow = true;
             }
-        });
+          });
         return clonedScene;
     }, [scene]);
+
 
     return (
         <mesh {...props}>

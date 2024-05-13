@@ -60,7 +60,7 @@ const BrickList: React.FC = () => {
     }, [startStop, nextBrickIndex]);
 
     return (
-        <group position={[0, 1.25, 0]}>
+        <group position={[0, 1, 0]}>
 
             {[...brickList].reverse().map((brick, index) => (
                 <CodeBrick
@@ -69,7 +69,7 @@ const BrickList: React.FC = () => {
                     label={brick.label}
                     activated={brick.activated}
                     execute={brick.execute}
-                    position={[0, index / 4, 0]} // Stack bricks on top of each other
+                    position={[0, index / 3.7, 0]} // Stack bricks on top of each other
                 />
             ))}
             <CodeBrick
@@ -77,12 +77,12 @@ const BrickList: React.FC = () => {
                 label="End"
                 activated={false}
                 execute={() => {}}
-                position={[0, -0.25, 0]}
+                position={[0, -0.27, 0]}
             />
             <Arrow
                 position={[
                     -0.5,
-                    (brickList.length - (nextBrickIndex + 1)) / 4,
+                    (brickList.length - (nextBrickIndex + 1)) / 3.7,
                     0,
                 ]}
             />
