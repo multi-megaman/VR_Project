@@ -6,7 +6,7 @@ import { VRButton, ARButton, XR, Controllers, Hands } from "@react-three/xr";
 import * as THREE from "three";
 import Object3D from "@/app/components/Object3D";
 
-import { Cube, Floor, Table, VisiblePointLight } from "./Objects";
+import { Cube, Floor, Table, VisiblePointLight, Wall } from "./Objects";
 
 import { Physics } from "@react-three/cannon";
 import repTex from "@/app/components/RepTex";
@@ -32,18 +32,27 @@ const VRExperience: React.FC = () => {
             <Controllers />
             <Hands />
 
-            <ambientLight intensity={Math.PI / 3} />
+            <ambientLight intensity={Math.PI / 2} />
             <spotLight
-              position={[10, 10, 10]}
+              position={[0, 50, 4]}
               angle={0.15}
               penumbra={1}
               decay={0}
-              intensity={Math.PI}
+              intensity={Math.PI/3}
             />
+            {/* <directionalLight
+              position={[0, 10, 0]}
+              intensity={Math.PI / 5}
+            /> */}
 
             {/* The Object3D here represents the whole scene */}
             {/* <Object3D> */}
             <Floor />
+            <Floor position={[0, 10, 0]} />
+            <Wall position={[0, 0, -10]} args={[20, 20, 1]} />
+            <Wall position={[0, 0, 10]} args={[20, 20, 1]} />
+            <Wall position={[-10, 0, 0]} args={[1, 20, 20]} />
+            <Wall position={[10, 0, 0]} args={[1, 20, 20]} />
             {/* <Cube args={[3, 3, 3]} position={[0, 4, -6]} />
             <Cube args={[2, 2, 2]} position={[0, 8, -6.8]} /> */}
             <Robot/>

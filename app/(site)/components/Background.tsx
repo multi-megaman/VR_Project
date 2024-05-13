@@ -1,12 +1,12 @@
 "use client";
 import React from "react";
 
-interface BackgroundProps {
-  image: string;
-}
-//create the style of the background animation
+  interface BackgroundProps {
+    image: string;
+  }
+  //create the style of the background animation
 
-const Background: React.FC<BackgroundProps> = ({ image }) => {
+  const Background: React.FC<BackgroundProps> = ({ image }) => {
   return (
     <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-50">
       <div
