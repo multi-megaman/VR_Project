@@ -14,9 +14,9 @@ import { Suspense, useMemo, useRef, useState } from "react";
 import { useLoader } from "react-three-fiber";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import RobotRefContext from "@/app/context/robotStateContext";
-import CodeBrick, { CodeBrickProps } from "@/app/components/CodeBrick";
+import CodeBrick, { CodeBrickProps } from "@/app/components/CodeBricks/CodeBrick";
 import { CodeBricksContext } from "@/app/context/codeBricksContext";
-import BrickList, { BrickListProps } from "@/app/components/BrickList";
+import BrickList from "@/app/components/CodeBricks/BrickList";
 
 function Sound({ url }) {
     const sound: any = useRef();
@@ -29,7 +29,7 @@ function Sound({ url }) {
 
 const Robot = ({ children, ...props }: any) => {
     const { scene } = useLoader(GLTFLoader, "models/robot/scene.gltf");
-    const [brickList, setBrickList] = useState<CodeBrickProps[]>([]);
+
     const model = useMemo(() => {
         const clonedScene = scene.clone();
         clonedScene.traverse((node) => {
@@ -40,6 +40,8 @@ const Robot = ({ children, ...props }: any) => {
         });
         return clonedScene;
     }, [scene]);
+
+
 
     const [holdingCube, setHoldingCube] = useState(false);
     const arrowHelper = new ArrowHelper(
@@ -156,7 +158,7 @@ const Robot = ({ children, ...props }: any) => {
 
     return (
         <RobotRefContext.Provider value={ref}>
-            <CodeBricksContext.Provider value={{ brickList, setBrickList }}>
+            
                 <mesh castShadow receiveShadow>
                     <primitive object={arrowHelper} />
                     <mesh ref={ref} {...props}>
@@ -170,7 +172,6 @@ const Robot = ({ children, ...props }: any) => {
                         <BrickList />
                     </mesh>
                 </mesh>
-            </CodeBricksContext.Provider>
         </RobotRefContext.Provider>
     );
 };
