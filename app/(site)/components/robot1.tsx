@@ -43,7 +43,7 @@ const Robot = ({ children, ...props }: any) => {
     // );
     const [ref, api] = useBox(() => ({
         mass: 1,
-        position: [0, 4, -3],
+        position: [0, 4, -3.5],
         args: [0.55, 0.55, 0.55],
     }));
 

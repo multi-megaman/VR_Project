@@ -55,9 +55,9 @@ const VRExperience: React.FC = () => {
             <Wall position={[10, 0, 0]} args={[1, 20, 20]} />
             {/* <Cube args={[3, 3, 3]} position={[0, 4, -6]} />
             <Cube args={[2, 2, 2]} position={[0, 8, -6.8]} /> */}
-            <Robot/>
+            <Robot position={[]}/>
             
-            <Table position={[0, 0, -4]} />
+            <Table position={[0, 0, -4.5]} />
             {/* </Object3D> */}
           </XR>
         </Suspense>

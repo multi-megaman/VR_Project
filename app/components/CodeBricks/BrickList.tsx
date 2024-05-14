@@ -3,10 +3,18 @@ import React, { Ref, useContext, useEffect, useRef, useState } from "react";
 import CodeBrick, { CodeBrickProps } from "./CodeBrick";
 import { foward, right } from "./Bricks";
 import { useXR } from "@react-three/xr";
-import { useFrame } from "react-three-fiber";
+import { useFrame, useThree } from "react-three-fiber";
 import Arrow from "./Arrow";
 import RobotContext from "@/app/context/robotContext";
-import { Quaternion, Vector3 } from "three";
+import {
+    BufferGeometry,
+    Material,
+    Mesh,
+    NormalBufferAttributes,
+    Object3DEventMap,
+    Quaternion,
+    Vector3,
+} from "three";
 
 const BrickList: React.FC = () => {
     const robot = useContext(RobotContext);
@@ -18,6 +26,29 @@ const BrickList: React.FC = () => {
     const [buttonPressed, setButtonPressed] = React.useState(false);
     const posRef = useRef(new Vector3(0, 0, 0));
     const rotRef = useRef(new Quaternion(0, 0, 0, 1));
+
+    const groupRef = useRef<Mesh<
+        BufferGeometry<NormalBufferAttributes>,
+        Material | Material[],
+        Object3DEventMap
+    > | null>(null); // Create a ref for the group
+    const { camera } = useThree(); // Get the camera from the Three.js context
+
+    //make the bricklist aways face the camera
+    useFrame(() => {
+        if (groupRef.current) {
+            // Create a new vector that has the same x and z coordinates as the camera but the same y coordinate as the object
+            const lookAtPosition = new Vector3(
+                camera.position.x,
+                groupRef.current.position.y + 1,
+                camera.position.z
+            );
+
+            // Make the object look at the new vector
+            groupRef.current.lookAt(lookAtPosition);
+        }
+    });
+
     // Start/stop execution when button 1 is pressed
     useFrame(() => {
         if (controllers && controllers[0]) {
@@ -36,7 +67,16 @@ const BrickList: React.FC = () => {
 
     //for test
     useEffect(() => {
-        setBrickList([foward, right, foward, right, foward, right, foward, right]);
+        setBrickList([
+            foward,
+            right,
+            foward,
+            right,
+            foward,
+            right,
+            foward,
+            right,
+        ]);
     }, []);
 
     const updateBrickInput = (index: number, input: number) => {
@@ -65,7 +105,7 @@ const BrickList: React.FC = () => {
     }, [startStop, nextBrickIndex]);
 
     return (
-        <mesh>
+        <mesh ref={groupRef}>
             <group position={[0, 1, 0]}>
                 {[...brickList].reverse().map((brick, index) => (
                     <CodeBrick
