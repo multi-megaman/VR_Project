@@ -109,25 +109,26 @@ const Robot = ({ children, ...props }: any) => {
                         //ADJUSTMENT FOR THE CUBE ROTATION IN COMPARASION TO THE CONTROLLER
                         // Get the current rotation of the cube
                         const cubeQuaternion = ref.current.quaternion;
-                        // Ensure the quaternion of the cube stays close to the quaternion of the controller
-                        if (controllerQuaternion.dot(cubeQuaternion) < 0) {
-                            controllerQuaternion.set(
-                                -controllerQuaternion.x,
-                                -controllerQuaternion.y,
-                                -controllerQuaternion.z,
-                                -controllerQuaternion.w
-                            );
-                        }
+                        // // Ensure the quaternion of the cube stays close to the quaternion of the controller
+                        // if (controllerQuaternion.dot(cubeQuaternion) < 0) {
+                        //     controllerQuaternion.set(
+                        //         -controllerQuaternion.x,
+                        //         -controllerQuaternion.y,
+                        //         -controllerQuaternion.z,
+                        //         -controllerQuaternion.w
+                        //     );
+                        // }
 
                         api.position.set(
                             controllerPosition.x,
                             controllerPosition.y,
                             controllerPosition.z
                         );
-                        api.rotation.set(
+                        api.quaternion.set(
                             controllerQuaternion.x,
                             controllerQuaternion.y,
-                            controllerQuaternion.z
+                            controllerQuaternion.z,
+                            controllerQuaternion.w
                         );
 
                         api.velocity.set(0, 0, 0);

@@ -7,11 +7,7 @@ import { useFrame, useThree } from "react-three-fiber";
 import Arrow from "./Arrow";
 import RobotContext from "@/app/context/robotContext";
 import {
-    BufferGeometry,
-    Material,
     Mesh,
-    NormalBufferAttributes,
-    Object3DEventMap,
     Quaternion,
     Vector3,
 } from "three";
@@ -27,11 +23,7 @@ const BrickList: React.FC = () => {
     const posRef = useRef(new Vector3(0, 0, 0));
     const rotRef = useRef(new Quaternion(0, 0, 0, 1));
 
-    const groupRef = useRef<Mesh<
-        BufferGeometry<NormalBufferAttributes>,
-        Material | Material[],
-        Object3DEventMap
-    > | null>(null); // Create a ref for the group
+    const groupRef = useRef<Mesh | null>(null); // Create a ref for the group
     const { camera } = useThree(); // Get the camera from the Three.js context
 
     //make the bricklist aways face the camera
@@ -40,10 +32,9 @@ const BrickList: React.FC = () => {
             // Create a new vector that has the same x and z coordinates as the camera but the same y coordinate as the object
             const lookAtPosition = new Vector3(
                 camera.position.x,
-                groupRef.current.position.y + 1,
+                groupRef.current.position.y,
                 camera.position.z
             );
-
             // Make the object look at the new vector
             groupRef.current.lookAt(lookAtPosition);
         }
@@ -67,16 +58,7 @@ const BrickList: React.FC = () => {
 
     //for test
     useEffect(() => {
-        setBrickList([
-            foward,
-            right,
-            foward,
-            right,
-            foward,
-            right,
-            foward,
-            right,
-        ]);
+        setBrickList([foward,right,foward,right,foward,right,foward,right,]);
     }, []);
 
     const updateBrickInput = (index: number, input: number) => {
@@ -101,6 +83,10 @@ const BrickList: React.FC = () => {
         // updateBrickInput(0, 20);
         if (startStop && nextBrickIndex < brickList.length) {
             executeNextBrick(nextBrickIndex);
+        }
+        if (nextBrickIndex === brickList.length) {
+            // setStartStop(false);
+            setNextBrickIndex(0);
         }
     }, [startStop, nextBrickIndex]);
 
