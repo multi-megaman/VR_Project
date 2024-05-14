@@ -6,18 +6,18 @@ import { useXR } from "@react-three/xr";
 import { useFrame } from "react-three-fiber";
 import Arrow from "./Arrow";
 import RobotContext from "@/app/context/robotContext";
-import { BufferGeometry, Material, Mesh, NormalBufferAttributes, Object3DEventMap, Triangle, Vector3 } from "three";
-import { Triplet } from "@react-three/cannon";
+import { Quaternion, Vector3 } from "three";
 
-const BrickList: React.FC= () => {
+const BrickList: React.FC = () => {
     const robot = useContext(RobotContext);
-    const [waitTime, setWaitTime] = useState(2000);
+    const [waitTime, setWaitTime] = useState(1000);
     const [brickList, setBrickList] = useState<CodeBrickProps[]>([]);
     const [nextBrickIndex, setNextBrickIndex] = useState(0);
     const [startStop, setStartStop] = useState(false);
     const { controllers } = useXR();
     const [buttonPressed, setButtonPressed] = React.useState(false);
-    const tripletRef = useRef(new Vector3(0, 0, 0));
+    const posRef = useRef(new Vector3(0, 0, 0));
+    const rotRef = useRef(new Quaternion(0, 0, 0, 1));
     // Start/stop execution when button 1 is pressed
     useFrame(() => {
         if (controllers && controllers[0]) {
@@ -36,7 +36,7 @@ const BrickList: React.FC= () => {
 
     //for test
     useEffect(() => {
-        setBrickList([foward, right, foward, right, foward]);
+        setBrickList([foward, right, foward, right, foward, right, foward, right]);
     }, []);
 
     const updateBrickInput = (index: number, input: number) => {
@@ -51,7 +51,7 @@ const BrickList: React.FC= () => {
         // console.log("Executing brick", brickIndex);
         const brick = brickList[brickIndex];
         brick.activated = true;
-        brick.execute(brick.input, robot.api, tripletRef);
+        brick.execute(brick.input, robot.api, posRef, rotRef);
         brick.activated = false;
         await new Promise((resolve) => setTimeout(resolve, waitTime));
         setNextBrickIndex((prev) => prev + 1);

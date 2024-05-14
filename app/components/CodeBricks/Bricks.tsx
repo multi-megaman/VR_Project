@@ -1,36 +1,44 @@
 import React, { MutableRefObject, RefObject } from "react";
 import CodeBrick, { CodeBrickProps } from "./CodeBrick";
 import { PublicApi, Triplet } from "@react-three/cannon";
-import { Object3D, Object3DEventMap, Vector3 } from "three";
+import { Object3D, Object3DEventMap, Quaternion, Vector3 } from "three";
 
 function stopPhysics(api: PublicApi) {
     api.velocity.set(0, 0, 0);
     api.angularVelocity.set(0, 0, 0);
 }
 
-const moveForward: CodeBrickProps["execute"] = async (distance: number, api: PublicApi, ref: MutableRefObject<Vector3>) => {
+const moveForward: CodeBrickProps["execute"] = async (distance: number, api: PublicApi, posRef: MutableRefObject<Vector3>, rotRef: MutableRefObject<Quaternion>) => {
     console.log("Moving forward...", distance);
-    stopPhysics(api);
+
+    // Get the current position
+    await new Promise(resolve => api.position.subscribe((v) => {
+        posRef.current = new Vector3(v[0], v[1], v[2]);
+        resolve(null);
+    }));
+    const position = posRef.current;
 
     // Get the current rotation
-    api.rotation.subscribe((v) => {
-        return (ref.current = new Vector3(v[0], v[1], v[2]));
-    });
-    const rotation = ref.current;
-    
-    // Calculate the direction vector
-    const direction = new Vector3(
-        -Math.sin(rotation.y),
-        0,
-        -Math.cos(rotation.y)
-    );
+    await new Promise(resolve => api.quaternion.subscribe((v) => {
+        rotRef.current = new Quaternion(v[0], v[1], v[2], v[3]);
+        resolve(null);
+    }));
+    const rotation = rotRef.current;
 
-    // Apply force in the direction the cube is facing
-    api.applyForce([direction.x * distance * 100, -direction.y * distance * 100, direction.z * distance * 100], [0, -1, 0]);
+    // Create a displacement vector that represents the forward direction
+    const displacement = new Vector3(0, 0, distance * 0.5);
 
-    // Correct the rotation of the cube
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    api.rotation.set(0, rotation.y, 0);
+    // Rotate the displacement vector by the current orientation of the robot
+    displacement.applyQuaternion(rotation);
+
+    // Add the displacement to the current position
+    const newPosition = position.add(displacement);
+
+    // Set the new position
+    api.position.set(newPosition.x, newPosition.y, newPosition.z);
+    posRef.current = newPosition;
+
+    console.log("position", posRef.current);
 };
 
 export const foward: CodeBrickProps = {
@@ -41,16 +49,28 @@ export const foward: CodeBrickProps = {
     execute: moveForward,
 };
 
-const turnRight: CodeBrickProps["execute"] = (angle: number, api: PublicApi, ref: MutableRefObject<Vector3>) => {
+const turnRight: CodeBrickProps["execute"] = async (angle: number, api: PublicApi, ref: MutableRefObject<Vector3>, rotRef: MutableRefObject<Quaternion>) => {
     console.log("Turning right...", angle);
+
     // Get the current rotation
-    api.rotation.subscribe((v) => {
-        return (ref.current = new Vector3(v[0], v[1], v[2]));
-    });
-    const rotation = ref.current;
-    stopPhysics(api);
-    api.rotation.set(0, rotation.y + angle, 0);
-    // api.position.set(ref.current.x, ref.current.y, ref.current.z);
+    await new Promise(resolve => api.quaternion.subscribe((v) => {
+        rotRef.current = new Quaternion(v[0], v[1], v[2], v[3]);
+        resolve(null);
+    }));
+    const rotation = rotRef.current;
+
+    // Create a quaternion that represents a 90 degree rotation around the y-axis
+    const rotationQuaternion = new Quaternion();
+    rotationQuaternion.setFromAxisAngle(new Vector3(0, 1, 0), Math.PI / 2);
+
+    // Multiply the current orientation quaternion by the rotation quaternion
+    const newRotation = rotation.multiply(rotationQuaternion);
+
+    // Set the new rotation
+    api.quaternion.set(newRotation.x, newRotation.y, newRotation.z, newRotation.w);
+    rotRef.current = newRotation;
+
+    console.log("rotation", rotRef.current);
 };
 
 export const right: CodeBrickProps = {

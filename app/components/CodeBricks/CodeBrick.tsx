@@ -2,7 +2,7 @@ import React, { MutableRefObject, RefObject, useMemo } from "react";
 import { MeshProps, useLoader } from "react-three-fiber";
 import { Text } from "@react-three/drei";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import { Mesh, MeshStandardMaterial, Object3D, Object3DEventMap, Vector3 } from "three";
+import { Mesh, MeshStandardMaterial, Object3D, Object3DEventMap, Quaternion, Vector3 } from "three";
 import { PublicApi, Triplet } from "@react-three/cannon";
 
 export interface CodeBrickProps extends MeshProps {
@@ -10,7 +10,7 @@ export interface CodeBrickProps extends MeshProps {
     label: string;
     activated?: boolean;
     input?: any;
-    execute: (input:any, api:PublicApi, ref:MutableRefObject<Vector3>) => void;
+    execute: (input:any, api:PublicApi, posRef:MutableRefObject<Vector3>, rotRef: MutableRefObject<Quaternion>) => void;
 }
 
 const CodeBrick: React.FC<CodeBrickProps> = ({
