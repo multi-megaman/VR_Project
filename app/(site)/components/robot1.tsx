@@ -156,8 +156,8 @@ const Robot = ({ children, ...props }: any) => {
                     />
                     <Sound url="audio/audio.mp3" />
                     {/* <boxGeometry args={[0.5, 0.5, 0.5]} /> */}
-                    <BrickList />
                 </mesh>
+                <BrickList />
             </mesh>
         </RobotContext.Provider>
     );

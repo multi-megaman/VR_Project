@@ -36,7 +36,7 @@ const BrickList: React.FC = () => {
                 camera.position.z
             );
             // Make the object look at the new vector
-            groupRef.current.lookAt(lookAtPosition);
+            groupRef.current.position.set(lookAtPosition.x -1.2, lookAtPosition.y, lookAtPosition.z - 1.5)
         }
     });
 
