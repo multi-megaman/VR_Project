@@ -1,15 +1,16 @@
-import React, { useMemo } from "react";
+import React, { MutableRefObject, RefObject, useMemo } from "react";
 import { MeshProps, useLoader } from "react-three-fiber";
 import { Text } from "@react-three/drei";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import { Mesh, MeshStandardMaterial } from "three";
+import { Mesh, MeshStandardMaterial, Object3D, Object3DEventMap, Vector3 } from "three";
+import { PublicApi, Triplet } from "@react-three/cannon";
 
 export interface CodeBrickProps extends MeshProps {
     color: string;
     label: string;
     activated?: boolean;
     input?: any;
-    execute: (input:any) => void;
+    execute: (input:any, api:PublicApi, ref:MutableRefObject<Vector3>) => void;
 }
 
 const CodeBrick: React.FC<CodeBrickProps> = ({
@@ -43,10 +44,10 @@ const CodeBrick: React.FC<CodeBrickProps> = ({
             />
             <Text
                 position={[0, 0, 0.11]}
-                fontSize={0.05}
+                fontSize={0.07}
                 color={"black"}
             >
-                {label}
+                {label}{input ? `(${input})` : ""}
             </Text>
         </mesh>
     );

@@ -1,19 +1,11 @@
-import { useFrame } from "@react-three/fiber";
-import {
-    ArrowHelper,
-    Mesh,
-    Quaternion,
-    Raycaster,
-    TextureLoader,
-    Vector3,
-} from "three";
+import { Mesh, Quaternion, Raycaster, Vector3 } from "three";
 import { useBox } from "@react-three/cannon";
 import { useXR } from "@react-three/xr";
-import { PositionalAudio, useGLTF } from "@react-three/drei";
+import { PositionalAudio } from "@react-three/drei";
 import { Suspense, useMemo, useRef, useState } from "react";
-import { useLoader } from "react-three-fiber";
+import { useFrame, useLoader } from "react-three-fiber";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import RobotRefContext from "@/app/context/robotStateContext";
+import RobotContext from "@/app/context/robotContext";
 import BrickList from "@/app/components/CodeBricks/BrickList";
 
 interface SoundProps {
@@ -42,8 +34,6 @@ const Robot = ({ children, ...props }: any) => {
         return clonedScene;
     }, [scene]);
 
-
-
     const [holdingCube, setHoldingCube] = useState(false);
     // const arrowHelper = new ArrowHelper(
     //     new Vector3(1, 0, 0),
@@ -56,6 +46,7 @@ const Robot = ({ children, ...props }: any) => {
         position: [0, 4, -3],
         args: [0.55, 0.55, 0.55],
     }));
+
     const { controllers, session } = useXR();
     const raycaster = new Raycaster();
 
@@ -152,24 +143,22 @@ const Robot = ({ children, ...props }: any) => {
             handleCubeInteraction(controller, triggerPressed);
         }
     });
-
     return (
-        <RobotRefContext.Provider value={ref}>
-            
-                <mesh castShadow receiveShadow>
-                    {/* <primitive object={arrowHelper} /> */}
-                    <mesh ref={ref} {...props}>
-                        <primitive
-                            object={model}
-                            scale={0.015}
-                            rotation={[0, 0, 0]}
-                        />
-                        <Sound url="audio/audio.mp3" />
-                        {/* <boxGeometry args={[0.5, 0.5, 0.5]} /> */}
-                        <BrickList />
-                    </mesh>
+        <RobotContext.Provider value={{ ref, api }}>
+            <mesh castShadow receiveShadow>
+                {/* <primitive object={arrowHelper} /> */}
+                <mesh ref={ref} {...props}>
+                    <primitive
+                        object={model}
+                        scale={0.015}
+                        rotation={[0, 0, 0]}
+                    />
+                    <Sound url="audio/audio.mp3" />
+                    {/* <boxGeometry args={[0.5, 0.5, 0.5]} /> */}
+                    <BrickList />
                 </mesh>
-        </RobotRefContext.Provider>
+            </mesh>
+        </RobotContext.Provider>
     );
 };
 

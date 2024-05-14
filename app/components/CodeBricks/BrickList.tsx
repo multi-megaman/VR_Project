@@ -1,18 +1,23 @@
 // BrickList.tsx
-import React, { useEffect, useState } from "react";
+import React, { Ref, useContext, useEffect, useRef, useState } from "react";
 import CodeBrick, { CodeBrickProps } from "./CodeBrick";
 import { foward, right } from "./Bricks";
 import { useXR } from "@react-three/xr";
 import { useFrame } from "react-three-fiber";
 import Arrow from "./Arrow";
-const BrickList: React.FC = () => {
+import RobotContext from "@/app/context/robotContext";
+import { BufferGeometry, Material, Mesh, NormalBufferAttributes, Object3DEventMap, Triangle, Vector3 } from "three";
+import { Triplet } from "@react-three/cannon";
+
+const BrickList: React.FC= () => {
+    const robot = useContext(RobotContext);
     const [waitTime, setWaitTime] = useState(2000);
     const [brickList, setBrickList] = useState<CodeBrickProps[]>([]);
     const [nextBrickIndex, setNextBrickIndex] = useState(0);
     const [startStop, setStartStop] = useState(false);
     const { controllers } = useXR();
     const [buttonPressed, setButtonPressed] = React.useState(false);
-
+    const tripletRef = useRef(new Vector3(0, 0, 0));
     // Start/stop execution when button 1 is pressed
     useFrame(() => {
         if (controllers && controllers[0]) {
@@ -31,7 +36,7 @@ const BrickList: React.FC = () => {
 
     //for test
     useEffect(() => {
-        setBrickList([foward, right, foward, foward, foward, right]);
+        setBrickList([foward, right, foward, right, foward]);
     }, []);
 
     const updateBrickInput = (index: number, input: number) => {
@@ -46,7 +51,7 @@ const BrickList: React.FC = () => {
         // console.log("Executing brick", brickIndex);
         const brick = brickList[brickIndex];
         brick.activated = true;
-        brick.execute(brick.input);
+        brick.execute(brick.input, robot.api, tripletRef);
         brick.activated = false;
         await new Promise((resolve) => setTimeout(resolve, waitTime));
         setNextBrickIndex((prev) => prev + 1);
@@ -60,33 +65,34 @@ const BrickList: React.FC = () => {
     }, [startStop, nextBrickIndex]);
 
     return (
-        <group position={[0, 1, 0]}>
-
-            {[...brickList].reverse().map((brick, index) => (
+        <mesh>
+            <group position={[0, 1, 0]}>
+                {[...brickList].reverse().map((brick, index) => (
+                    <CodeBrick
+                        key={index}
+                        color={brick.color}
+                        label={brick.label}
+                        activated={brick.activated}
+                        execute={brick.execute}
+                        position={[0, index / 3.7, 0]} // Stack bricks on top of each other
+                    />
+                ))}
                 <CodeBrick
-                    key={index}
-                    color={brick.color}
-                    label={brick.label}
-                    activated={brick.activated}
-                    execute={brick.execute}
-                    position={[0, index / 3.7, 0]} // Stack bricks on top of each other
+                    color="white"
+                    label="End"
+                    activated={false}
+                    execute={() => {}}
+                    position={[0, -0.27, 0]}
                 />
-            ))}
-            <CodeBrick
-                color="white"
-                label="End"
-                activated={false}
-                execute={() => {}}
-                position={[0, -0.27, 0]}
-            />
-            <Arrow
-                position={[
-                    -0.5,
-                    (brickList.length - (nextBrickIndex + 1)) / 3.7,
-                    0,
-                ]}
-            />
-        </group>
+                <Arrow
+                    position={[
+                        -0.5,
+                        (brickList.length - (nextBrickIndex + 1)) / 3.7,
+                        0,
+                    ]}
+                />
+            </group>
+        </mesh>
     );
 };
 
