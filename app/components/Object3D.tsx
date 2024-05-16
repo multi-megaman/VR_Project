@@ -23,6 +23,7 @@ interface Object3DProps extends MeshProps {
   repTex?: Vector2;
   objArgs?: [number, number, number];
   unaffected?: boolean;
+  visible?: boolean;
 }
 
 const Object3D = ({
@@ -30,6 +31,7 @@ const Object3D = ({
   repTex = new Vector2(1, 1),
   objArgs = [1, 1, 1],
   unaffected = false,
+  visible = true,
   children,
   ...rest
 }: Object3DProps) => {
@@ -72,6 +74,7 @@ const Object3D = ({
       {...rest}
       castShadow
       receiveShadow
+      visible={visible}
     >
       {children}
     </mesh>

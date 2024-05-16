@@ -6,14 +6,11 @@ import { useXR } from "@react-three/xr";
 import { useFrame, useThree } from "react-three-fiber";
 import Arrow from "./Arrow";
 import RobotContext from "@/app/context/robotContext";
-import {
-    Mesh,
-    Quaternion,
-    Vector3,
-} from "three";
+import { Mesh, Quaternion, Vector3 } from "three";
 
 const BrickList: React.FC = () => {
     const robot = useContext(RobotContext);
+    const scale = 0.12;
     const [waitTime, setWaitTime] = useState(1000);
     const [brickList, setBrickList] = useState<CodeBrickProps[]>([]);
     const [nextBrickIndex, setNextBrickIndex] = useState(0);
@@ -29,14 +26,23 @@ const BrickList: React.FC = () => {
     //make the bricklist aways face the camera
     useFrame(() => {
         if (groupRef.current) {
-            // Create a new vector that has the same x and z coordinates as the camera but the same y coordinate as the object
-            const lookAtPosition = new Vector3(
-                camera.position.x,
-                groupRef.current.position.y,
-                camera.position.z
-            );
-            // Make the object look at the new vector
-            groupRef.current.position.set(lookAtPosition.x -1.2, lookAtPosition.y, lookAtPosition.z - 1.5)
+            if (controllers && controllers[1]) {
+                const controller = controllers[1];
+                const controllerPosition = new Vector3();
+                controller.controller.getWorldPosition(controllerPosition);
+                groupRef.current.position.set(
+                    controllerPosition.x,
+                    controllerPosition.y + (((brickList.length * scale ** 4) / (3.7 ))) - 0.01, // Adjust the y-coordinate here
+                    controllerPosition.z
+                );
+                groupRef.current.lookAt(
+                    new Vector3(
+                        camera.position.x,
+                        groupRef.current.position.y,
+                        camera.position.z
+                    )
+                );
+            }
         }
     });
 
@@ -58,7 +64,21 @@ const BrickList: React.FC = () => {
 
     //for test
     useEffect(() => {
-        setBrickList([foward,right,foward,right,foward,right,foward,right,]);
+        setBrickList([
+            foward,
+            right,
+            foward,
+            right,
+            foward,
+            right,
+            foward,
+            right,
+            foward,
+            right,
+            foward,
+            right,
+
+        ]);
     }, []);
 
     const updateBrickInput = (index: number, input: number) => {
@@ -79,6 +99,7 @@ const BrickList: React.FC = () => {
         setNextBrickIndex((prev) => prev + 1);
     };
 
+    // Execute the next brick if the state is in "start" button is pressed
     useEffect(() => {
         // updateBrickInput(0, 20);
         if (startStop && nextBrickIndex < brickList.length) {
@@ -91,7 +112,7 @@ const BrickList: React.FC = () => {
     }, [startStop, nextBrickIndex]);
 
     return (
-        <mesh ref={groupRef}>
+        <mesh ref={groupRef} scale={scale}>
             <group position={[0, 1, 0]}>
                 {[...brickList].reverse().map((brick, index) => (
                     <CodeBrick

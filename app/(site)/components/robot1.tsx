@@ -43,8 +43,8 @@ const Robot = ({ children, ...props }: any) => {
     // );
     const [ref, api] = useBox(() => ({
         mass: 1,
-        position: [0, 4, -3.5],
-        args: [0.55, 0.55, 0.55],
+        position: props.position || [0, 3, -2],
+        args: [0.2, 0.2, 0.2],
     }));
 
     const { controllers, session } = useXR();
@@ -151,7 +151,7 @@ const Robot = ({ children, ...props }: any) => {
                 <mesh ref={ref} {...props}>
                     <primitive
                         object={model}
-                        scale={0.015}
+                        scale={0.005}
                         rotation={[0, 0, 0]}
                     />
                     <Sound url="audio/audio.mp3" />

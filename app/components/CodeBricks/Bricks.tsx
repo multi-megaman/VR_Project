@@ -26,7 +26,7 @@ const moveForward: CodeBrickProps["execute"] = async (distance: number, api: Pub
     const rotation = rotRef.current;
 
     // Create a displacement vector that represents the forward direction
-    const displacement = new Vector3(0, 0, distance * 0.5);
+    const displacement = new Vector3(0, 0, distance * 0.1);
 
     // Rotate the displacement vector by the current orientation of the robot
     displacement.applyQuaternion(rotation);

@@ -2,7 +2,7 @@ import Object3D from "@/app/components/Object3D";
 import repTex from "@/app/components/RepTex";
 import * as THREE from "three"; // Import the 'three' package
 
-export function Floor({position = [0, -1, 0]}) {
+export function Floor({position = [0, -1, 0] ,visible = true , ...props}) {
     return (
         <Object3D
             textureUrl="floor2.webp"
@@ -10,13 +10,14 @@ export function Floor({position = [0, -1, 0]}) {
             repTex={repTex(8, 8)}
             objArgs={[20, 1, 20]}
             unaffected
+            visible={visible}
         >
             <boxGeometry args={[20, 1, 20]} />
         </Object3D>
     );
 }
 
-export function Wall({ position = [0, 0, -10], args = [20, 10, 1] }) {
+export function Wall({ position = [0, 0, -10], args = [20, 10, 1] , visible = true,}) {
     return (
         <Object3D
             textureUrl="bricks.jpg"
@@ -24,13 +25,14 @@ export function Wall({ position = [0, 0, -10], args = [20, 10, 1] }) {
             repTex={repTex(4, 8)}
             objArgs={args as [number, number, number]}
             unaffected
+            visible={visible}
         >
             <boxGeometry args={args as [number, number, number]} />
         </Object3D>
     );
 }
 
-export const Cube = ({ args, ...props }: any) => {
+export const Cube = ({ args,visible, ...props }: any) => {
     return (
         <Object3D
             position={[0, 0, 0]}
@@ -38,15 +40,16 @@ export const Cube = ({ args, ...props }: any) => {
             objArgs={args as [number, number, number]}
             {...props}
             repTex={props.repTex ? props.repTex : repTex(1, 1)}
+            visible={visible}
         >
             <boxGeometry args={args as [number, number, number]} />
         </Object3D>
     );
 };
 
-export const Table = ({ args, ...props }: any) => {
+export const Table = ({ args, visible, ...props }: any) => {
     return (
-        <Cube unaffected args={[6, 2, 5]} repTex={repTex(2, 2)} textureUrl="wood2.jpg" {...props} />
+        <Cube unaffected args={args} repTex={repTex(2, 2)} textureUrl="wood2.jpg" visible={visible} {...props} />
     );
 };
 
