@@ -1,7 +1,7 @@
 // BrickList.tsx
 import React, { Ref, useContext, useEffect, useRef, useState } from "react";
 import CodeBrick, { CodeBrickProps } from "./CodeBrick";
-import { foward, right } from "./Bricks";
+import { backward, foward, jump, left, right } from "./Bricks";
 import { useXR } from "@react-three/xr";
 import { useFrame, useThree } from "react-three-fiber";
 import Arrow from "./Arrow";
@@ -10,7 +10,7 @@ import { Mesh, Quaternion, Vector3 } from "three";
 
 const BrickList: React.FC = () => {
     const robot = useContext(RobotContext);
-    const scale = 0.12;
+    const scale = 0.15;
     const [waitTime, setWaitTime] = useState(1000);
     const [brickList, setBrickList] = useState<CodeBrickProps[]>([]);
     const [nextBrickIndex, setNextBrickIndex] = useState(0);
@@ -67,16 +67,10 @@ const BrickList: React.FC = () => {
         setBrickList([
             foward,
             right,
-            foward,
-            right,
-            foward,
-            right,
-            foward,
-            right,
-            foward,
-            right,
-            foward,
-            right,
+            jump,
+            left,
+            backward,
+            jump,
 
         ]);
     }, []);
