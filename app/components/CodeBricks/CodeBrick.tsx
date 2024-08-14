@@ -6,6 +6,7 @@ import { Mesh, MeshStandardMaterial, Object3D, Object3DEventMap, Quaternion, Vec
 import { PublicApi, Triplet } from "@react-three/cannon";
 
 export interface CodeBrickProps extends MeshProps {
+    index: number;
     color: string;
     label: string;
     activated?: boolean;
@@ -14,6 +15,7 @@ export interface CodeBrickProps extends MeshProps {
 }
 
 const CodeBrick = forwardRef<Mesh, CodeBrickProps>(({
+    index,
     color,
     label,
     activated = false,
@@ -36,16 +38,18 @@ const CodeBrick = forwardRef<Mesh, CodeBrickProps>(({
 
 
     return (
-        <mesh ref={ref} {...props}>
+        <mesh ref={ref} {...props} userData={{"id": index}}>
             <primitive
                 object={model}
                 scale={0.25}
                 rotation={[0, Math.PI / 2, 0]}
+                userData={{"id": index}}
             />
             <Text
                 position={[0, 0, 0.11]}
                 fontSize={0.07}
                 color={"black"}
+                userData={{"id": index}}
             >
                 {label}{input ? `(${input})` : ""}
             </Text>

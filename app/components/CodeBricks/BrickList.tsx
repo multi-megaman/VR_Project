@@ -6,7 +6,7 @@ import { useController, useXR } from "@react-three/xr";
 import { useFrame, useThree } from "react-three-fiber";
 import Arrow from "./Arrow";
 import RobotContext from "@/app/context/robotContext";
-import { ArrowHelper, Mesh, Quaternion, Raycaster, Vector3 } from "three";
+import { Mesh, Quaternion, Raycaster, Vector3 } from "three";
 
 const BrickList: React.FC = () => {
     const robot = useContext(RobotContext);
@@ -21,14 +21,15 @@ const BrickList: React.FC = () => {
     const rotRef = useRef(new Quaternion(0, 0, 0, 1));
 
     const brickRefs = useRef<(Mesh | null)[]>([]);
-
+    const [previousIntersectedBrick, setPreviousIntersectedBrick] = useState<Mesh | null>(null);
+    const [brick2Swap, setBrick2Swap] = useState<number[]>([]);
 
     const rightController = useController('right');
     const raycaster = new Raycaster();
 
     const groupRef = useRef<Mesh | null>(null); // Create a ref for the group
     const { camera } = useThree(); // Get the camera from the Three.js context
-
+    const [buttonLock, setButtonLock] = useState(false);
     //make the bricklist aways face the camera
     useFrame(() => {
         if (groupRef.current) {
@@ -52,13 +53,13 @@ const BrickList: React.FC = () => {
         }
     });
 
-    // Start/stop execution when button 1 is pressed
+    // Start/stop execution when button 4 is pressed
     useFrame(() => {
         if (controllers && controllers[0]) {
             const gamepad = controllers[0].inputSource?.gamepad;
             if (gamepad) {
                 if (gamepad.buttons[4].pressed && !buttonPressed) {
-                    console.log("Button 2 pressed");
+                    console.log("Button 4 pressed");
                     setStartStop((prev) => !prev);
                     setButtonPressed(true);
                 } else if (!gamepad.buttons[4].pressed) {
@@ -74,20 +75,12 @@ const BrickList: React.FC = () => {
             foward,
             right,
             jump,
-            // left,
+            left,
             // backward,
             // jump,
 
         ]);
     }, []);
-
-    // const updateBrickInput = (index: number, input: number) => {
-    //     setBrickList((prevBrickList) => {
-    //         const newBrickList = [...prevBrickList];
-    //         newBrickList[index] = { ...newBrickList[index], input };
-    //         return newBrickList;
-    //     });
-    // };
 
     const executeNextBrick = async (brickIndex: number) => {
         // console.log("Executing brick", brickIndex);
@@ -100,6 +93,7 @@ const BrickList: React.FC = () => {
     };
 
     const swapBricks = (index1: number, index2: number) => {
+        console.log("Swapping bricks", brickList[index1], brickList[index2]);
         setBrickList((prevBrickList) => {
             const newBrickList = [...prevBrickList];
             [newBrickList[index1], newBrickList[index2]] = [newBrickList[index2], newBrickList[index1]];
@@ -120,17 +114,14 @@ const BrickList: React.FC = () => {
     }, [startStop, nextBrickIndex]);
 
     useEffect(() => {
-        // updateBrickInput(0, 20);
-        swapBricks(0, 1);
+        // Check if there are exactly 2 IDs in Brick2Swap
+        if (brick2Swap.length === 2) {
+            const [id1, id2] = brick2Swap;
+            swapBricks(id1, id2);
+            setBrick2Swap([]);
+        }
+    }, [brick2Swap]);
 
-    }, [startStop]);
-
-    const arrowHelper = new ArrowHelper(
-            new Vector3(1, 0, 0),
-            new Vector3(0, 0, 0),
-            5,
-            0xff0000
-        );
     useFrame(() => {
         if (rightController) {
             const controller = controllers[0];
@@ -154,14 +145,45 @@ const BrickList: React.FC = () => {
             const { grip } = rightController;
             const direction = new Vector3(0, 0, -1).applyQuaternion(grip.quaternion);
             raycaster.set(extendedControllerPosition, controllerDirection);
-            arrowHelper.setDirection(raycaster.ray.direction);
-            arrowHelper.position.copy(raycaster.ray.origin);
             const nonNullBrickRefs = brickRefs.current.filter((ref): ref is Mesh => ref !== null);
             const intersects = raycaster.intersectObjects(nonNullBrickRefs);
+
             if (intersects.length > 0) {
-                const intersectedBrick = intersects[0].object;
+                const intersectedBrick = intersects[0].object as Mesh;
                 intersectedBrick.scale.set(1.2, 1.2, 1.2);
-                console.log("Intersected brick", intersectedBrick);
+
+                const intersectedBrickIndex = intersectedBrick.userData.id;
+              
+                // Reset the scale of the previously intersected brick if it's different
+                if (previousIntersectedBrick && previousIntersectedBrick !== intersectedBrick) {
+                    previousIntersectedBrick.scale.set(1, 1, 1);
+                }
+
+                setPreviousIntersectedBrick(intersectedBrick);
+                // Check if the button zero is pressed
+                if (gamepad && gamepad.buttons[5].pressed && intersectedBrickIndex !== undefined && !buttonLock) {
+                    setButtonLock(true);
+                    console.log("putting brick in swap list", intersectedBrickIndex);
+                    setBrick2Swap((prevIds) => {
+                        const newIds = [...prevIds];
+                        if (newIds.length >= 2) {
+                            newIds.shift(); // Remove the oldest ID if there are already 2 IDs
+                        }
+                        newIds.push(intersectedBrickIndex);
+                        return newIds;
+                    });
+                }
+
+                if (gamepad && gamepad.buttons[5].value === 0) {
+                    setButtonLock(false);
+                }
+
+            } else {
+                // Reset the scale of the previously intersected brick if there are no intersections
+                if (previousIntersectedBrick) {
+                    previousIntersectedBrick.scale.set(1, 1, 1);
+                    setPreviousIntersectedBrick(null);
+                }
             }
         }
     });
@@ -169,9 +191,9 @@ const BrickList: React.FC = () => {
     return (
         <mesh ref={groupRef} scale={scale}>
             <group position={[0, 1, 0]}>
-                <primitive object={arrowHelper} />
                 {[...brickList].reverse().map((brick, index) => (
                     <CodeBrick
+                        index={index}
                         key={index}
                         color={brick.color}
                         label={brick.label}
@@ -181,9 +203,11 @@ const BrickList: React.FC = () => {
                         ref={(el: Mesh | null) => {
                             brickRefs.current[index] = el;
                         }}
+                        userData={{"id": index}}
                     />
                 ))}
                 <CodeBrick
+                    index={9999999}
                     color="white"
                     label="End"
                     activated={false}
