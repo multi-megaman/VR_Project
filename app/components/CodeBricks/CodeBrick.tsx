@@ -1,4 +1,4 @@
-import React, { MutableRefObject, RefObject, useMemo } from "react";
+import React, { forwardRef, MutableRefObject, RefObject, useMemo } from "react";
 import { MeshProps, useLoader } from "react-three-fiber";
 import { Text } from "@react-three/drei";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
@@ -10,17 +10,17 @@ export interface CodeBrickProps extends MeshProps {
     label: string;
     activated?: boolean;
     input?: any;
-    execute: (input:any, api:PublicApi, posRef:MutableRefObject<Vector3>, rotRef: MutableRefObject<Quaternion>) => void;
+    execute: (input: any, api: PublicApi, posRef: MutableRefObject<Vector3>, rotRef: MutableRefObject<Quaternion>) => void;
 }
 
-const CodeBrick: React.FC<CodeBrickProps> = ({
+const CodeBrick = forwardRef<Mesh, CodeBrickProps>(({
     color,
     label,
     activated = false,
     input,
     execute,
     ...props
-}) => {
+}, ref) => {
     const { scene } = useLoader(GLTFLoader, "models/codeBrick/scene.glb");
     const model = useMemo(() => {
         const clonedScene = scene.clone();
@@ -32,11 +32,11 @@ const CodeBrick: React.FC<CodeBrickProps> = ({
             }
           });
         return clonedScene;
-    }, [scene]);
+    }, [scene, color]);
 
 
     return (
-        <mesh {...props}>
+        <mesh ref={ref} {...props}>
             <primitive
                 object={model}
                 scale={0.25}
@@ -51,6 +51,6 @@ const CodeBrick: React.FC<CodeBrickProps> = ({
             </Text>
         </mesh>
     );
-};
+});
 
 export default CodeBrick;

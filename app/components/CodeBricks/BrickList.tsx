@@ -2,11 +2,11 @@
 import React, { Ref, useContext, useEffect, useRef, useState } from "react";
 import CodeBrick, { CodeBrickProps } from "./CodeBrick";
 import { backward, foward, jump, left, right } from "./Bricks";
-import { useXR } from "@react-three/xr";
+import { useController, useXR } from "@react-three/xr";
 import { useFrame, useThree } from "react-three-fiber";
 import Arrow from "./Arrow";
 import RobotContext from "@/app/context/robotContext";
-import { Mesh, Quaternion, Vector3 } from "three";
+import { ArrowHelper, Mesh, Quaternion, Raycaster, Vector3 } from "three";
 
 const BrickList: React.FC = () => {
     const robot = useContext(RobotContext);
@@ -19,6 +19,12 @@ const BrickList: React.FC = () => {
     const [buttonPressed, setButtonPressed] = React.useState(false);
     const posRef = useRef(new Vector3(0, 0, 0));
     const rotRef = useRef(new Quaternion(0, 0, 0, 1));
+
+    const brickRefs = useRef<(Mesh | null)[]>([]);
+
+
+    const rightController = useController('right');
+    const raycaster = new Raycaster();
 
     const groupRef = useRef<Mesh | null>(null); // Create a ref for the group
     const { camera } = useThree(); // Get the camera from the Three.js context
@@ -68,20 +74,20 @@ const BrickList: React.FC = () => {
             foward,
             right,
             jump,
-            left,
-            backward,
-            jump,
+            // left,
+            // backward,
+            // jump,
 
         ]);
     }, []);
 
-    const updateBrickInput = (index: number, input: number) => {
-        setBrickList((prevBrickList) => {
-            const newBrickList = [...prevBrickList];
-            newBrickList[index] = { ...newBrickList[index], input };
-            return newBrickList;
-        });
-    };
+    // const updateBrickInput = (index: number, input: number) => {
+    //     setBrickList((prevBrickList) => {
+    //         const newBrickList = [...prevBrickList];
+    //         newBrickList[index] = { ...newBrickList[index], input };
+    //         return newBrickList;
+    //     });
+    // };
 
     const executeNextBrick = async (brickIndex: number) => {
         // console.log("Executing brick", brickIndex);
@@ -91,6 +97,14 @@ const BrickList: React.FC = () => {
         brick.activated = false;
         await new Promise((resolve) => setTimeout(resolve, waitTime));
         setNextBrickIndex((prev) => prev + 1);
+    };
+
+    const swapBricks = (index1: number, index2: number) => {
+        setBrickList((prevBrickList) => {
+            const newBrickList = [...prevBrickList];
+            [newBrickList[index1], newBrickList[index2]] = [newBrickList[index2], newBrickList[index1]];
+            return newBrickList;
+        });
     };
 
     // Execute the next brick if the state is in "start" button is pressed
@@ -105,9 +119,57 @@ const BrickList: React.FC = () => {
         }
     }, [startStop, nextBrickIndex]);
 
+    useEffect(() => {
+        // updateBrickInput(0, 20);
+        swapBricks(0, 1);
+
+    }, [startStop]);
+
+    const arrowHelper = new ArrowHelper(
+            new Vector3(1, 0, 0),
+            new Vector3(0, 0, 0),
+            5,
+            0xff0000
+        );
+    useFrame(() => {
+        if (rightController) {
+            const controller = controllers[0];
+            const controllerPosition = new Vector3();
+            const controllerDirection = new Vector3(0, 0, -1); // Pointing forward in the controller's local space
+
+            const gamepad = controller.inputSource?.gamepad;
+
+
+            // Get the position of the controller
+            controller.controller.getWorldPosition(controllerPosition);
+
+            // Transform the direction vector to world space
+            controller.controller.localToWorld(controllerDirection);
+            controllerDirection.sub(controllerPosition).normalize(); // Subtract the position to get the direction
+
+            // Extend the ray origin a bit more to the back
+            const extendedControllerPosition = new Vector3()
+                .copy(controllerPosition)
+                .sub(controllerDirection.multiplyScalar(1));
+            const { grip } = rightController;
+            const direction = new Vector3(0, 0, -1).applyQuaternion(grip.quaternion);
+            raycaster.set(extendedControllerPosition, controllerDirection);
+            arrowHelper.setDirection(raycaster.ray.direction);
+            arrowHelper.position.copy(raycaster.ray.origin);
+            const nonNullBrickRefs = brickRefs.current.filter((ref): ref is Mesh => ref !== null);
+            const intersects = raycaster.intersectObjects(nonNullBrickRefs);
+            if (intersects.length > 0) {
+                const intersectedBrick = intersects[0].object;
+                intersectedBrick.scale.set(1.2, 1.2, 1.2);
+                console.log("Intersected brick", intersectedBrick);
+            }
+        }
+    });
+
     return (
         <mesh ref={groupRef} scale={scale}>
             <group position={[0, 1, 0]}>
+                <primitive object={arrowHelper} />
                 {[...brickList].reverse().map((brick, index) => (
                     <CodeBrick
                         key={index}
@@ -116,6 +178,9 @@ const BrickList: React.FC = () => {
                         activated={brick.activated}
                         execute={brick.execute}
                         position={[0, index / 3.7, 0]} // Stack bricks on top of each other
+                        ref={(el: Mesh | null) => {
+                            brickRefs.current[index] = el;
+                        }}
                     />
                 ))}
                 <CodeBrick
