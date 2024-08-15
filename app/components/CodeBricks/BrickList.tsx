@@ -76,7 +76,7 @@ const BrickList: React.FC = () => {
             right,
             jump,
             left,
-            // backward,
+            backward,
             // jump,
 
         ]);
@@ -93,10 +93,13 @@ const BrickList: React.FC = () => {
     };
 
     const swapBricks = (index1: number, index2: number) => {
-        console.log("Swapping bricks", brickList[index1], brickList[index2]);
         setBrickList((prevBrickList) => {
+            const length = prevBrickList.length;
+            const reverseIndex1 = length - 1 - index1;
+            const reverseIndex2 = length - 1 - index2;
+            console.log("Swapping bricks", prevBrickList[reverseIndex1], prevBrickList[reverseIndex2]);
             const newBrickList = [...prevBrickList];
-            [newBrickList[index1], newBrickList[index2]] = [newBrickList[index2], newBrickList[index1]];
+            [newBrickList[reverseIndex1], newBrickList[reverseIndex2]] = [newBrickList[reverseIndex2], newBrickList[reverseIndex1]];
             return newBrickList;
         });
     };
