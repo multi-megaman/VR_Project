@@ -36,23 +36,28 @@ const CodeBrick = forwardRef<Mesh, CodeBrickProps>(({
         return clonedScene;
     }, [scene, color]);
 
-
+    // Log userData to verify it is being set correctly
+    useMemo(() => {
+        console.log("Mesh userData:", { id: index });
+    }, [index]);
     return (
         <mesh ref={ref} {...props} userData={{"id": index}}>
+            <Text
+                position={[0, 0, 0.11]}
+                fontSize={0.13}
+                color={"black"}
+                name={"Text"}
+                userData={{"id": index}}
+            >
+                {label}{input ? `(${input})` : ""}
+            </Text>
             <primitive
                 object={model}
                 scale={0.25}
                 rotation={[0, Math.PI / 2, 0]}
                 userData={{"id": index}}
+
             />
-            <Text
-                position={[0, 0, 0.11]}
-                fontSize={0.07}
-                color={"black"}
-                userData={{"id": index}}
-            >
-                {label}{input ? `(${input})` : ""}
-            </Text>
         </mesh>
     );
 });

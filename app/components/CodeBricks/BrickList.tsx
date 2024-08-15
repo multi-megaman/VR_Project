@@ -119,9 +119,16 @@ const BrickList: React.FC = () => {
     useEffect(() => {
         // Check if there are exactly 2 IDs in Brick2Swap
         if (brick2Swap.length === 2) {
-            const [id1, id2] = brick2Swap;
-            swapBricks(id1, id2);
-            setBrick2Swap([]);
+            // If the IDs are the same, reset the list
+            if (brick2Swap[0] === brick2Swap[1]) {
+                setBrick2Swap([]);
+            }
+            else {
+                const [id1, id2] = brick2Swap;
+                swapBricks(id1, id2);
+                setBrick2Swap([]);
+
+            }
         }
     }, [brick2Swap]);
 
@@ -153,38 +160,43 @@ const BrickList: React.FC = () => {
 
             if (intersects.length > 0) {
                 const intersectedBrick = intersects[0].object as Mesh;
-                intersectedBrick.scale.set(1.2, 1.2, 1.2);
-
-                const intersectedBrickIndex = intersectedBrick.userData.id;
-              
-                // Reset the scale of the previously intersected brick if it's different
-                if (previousIntersectedBrick && previousIntersectedBrick !== intersectedBrick) {
-                    previousIntersectedBrick.scale.set(1, 1, 1);
+                if (intersectedBrick.name === "Text"){
+                    intersectedBrick.scale.set(1.5, 1.5, 1.5);
+                    intersectedBrick.parent.scale.set(1.5, 1.5, 1.5);
+                    const intersectedBrickIndex = intersectedBrick.userData.id;
+                  
+                    // Reset the scale of the previously intersected brick if it's different
+                    if (previousIntersectedBrick && previousIntersectedBrick !== intersectedBrick) {
+                        previousIntersectedBrick.scale.set(1, 1, 1);
+                        previousIntersectedBrick.parent.scale.set(1, 1, 1);
+                    }
+    
+                    setPreviousIntersectedBrick(intersectedBrick);
+                    // Check if the button zero is pressed
+                    if (gamepad && gamepad.buttons[5].pressed && intersectedBrickIndex !== undefined && !buttonLock) {
+                        setButtonLock(true);
+                        console.log("putting brick in swap list", intersectedBrickIndex);
+                        setBrick2Swap((prevIds) => {
+                            const newIds = [...prevIds];
+                            if (newIds.length >= 2) {
+                                newIds.shift(); // Remove the oldest ID if there are already 2 IDs
+                            }
+                            newIds.push(intersectedBrickIndex);
+                            return newIds;
+                        });
+                    }
+    
+                    if (gamepad && gamepad.buttons[5].value === 0) {
+                        setButtonLock(false);
+                    }
                 }
-
-                setPreviousIntersectedBrick(intersectedBrick);
-                // Check if the button zero is pressed
-                if (gamepad && gamepad.buttons[5].pressed && intersectedBrickIndex !== undefined && !buttonLock) {
-                    setButtonLock(true);
-                    console.log("putting brick in swap list", intersectedBrickIndex);
-                    setBrick2Swap((prevIds) => {
-                        const newIds = [...prevIds];
-                        if (newIds.length >= 2) {
-                            newIds.shift(); // Remove the oldest ID if there are already 2 IDs
-                        }
-                        newIds.push(intersectedBrickIndex);
-                        return newIds;
-                    });
-                }
-
-                if (gamepad && gamepad.buttons[5].value === 0) {
-                    setButtonLock(false);
-                }
+            
 
             } else {
                 // Reset the scale of the previously intersected brick if there are no intersections
                 if (previousIntersectedBrick) {
                     previousIntersectedBrick.scale.set(1, 1, 1);
+                    previousIntersectedBrick.parent.scale.set(1, 1, 1);
                     setPreviousIntersectedBrick(null);
                 }
             }
