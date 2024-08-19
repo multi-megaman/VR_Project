@@ -11,6 +11,7 @@ import { Cube, Floor, Table, VisiblePointLight, Wall } from "./Objects";
 import { Physics } from "@react-three/cannon";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import Robot from "./robot1";
+import CodeBrickCollection from "@/app/components/CodeBricks/CodeBrickCollection";
 
 interface VRExperienceProps {
   scaleX: number;
@@ -63,6 +64,7 @@ const VRExperience: React.FC = () => {
             {/* <Cube args={[3, 3, 3]} position={[0, 4, -6]} />
             <Cube args={[2, 2, 2]} position={[0, 8, -6.8]} /> */}
             <Robot position={[0,3,-1.2]}/>
+            <CodeBrickCollection />
             
             <Table args={[5.2,2.25,1.3]} position={[0, 0, -1.2]} visible={false}/>
             {/* </Object3D> */}

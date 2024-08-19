@@ -4,6 +4,7 @@ import { VRButton } from "@react-three/xr";
 import clsx from "clsx";
 import React, { useEffect, useRef } from "react";
 import VrButton from "@/app/components/vrButton";
+import { BrickListProvider } from "@/app/context/brickListContext";
 
 const VRDiv: React.FC = () => {
   const [vrMode, setVrMode] = React.useState(false);
@@ -26,6 +27,7 @@ const VRDiv: React.FC = () => {
   }
 
   return (
+    <BrickListProvider>
     <div className="w-screen h-screen flex flex-col items-center justify-center">
     <div className="hidden">
         <VRButton ref={vrButtonRef} />
@@ -33,7 +35,7 @@ const VRDiv: React.FC = () => {
     <button
       className={`${staticClasses} ${dynamicClasses}`}
       onClick={changeVrMode}
-    >
+      >
       On/Off
     </button>
     {(vrMode ? 
@@ -45,6 +47,7 @@ const VRDiv: React.FC = () => {
     </div> 
     )}
     </div>
+    </BrickListProvider>
   );
 };
 export default VRDiv;

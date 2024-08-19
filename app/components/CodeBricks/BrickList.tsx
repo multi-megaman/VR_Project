@@ -7,22 +7,25 @@ import { useFrame, useThree } from "react-three-fiber";
 import Arrow from "./Arrow";
 import RobotContext from "@/app/context/robotContext";
 import { Mesh, Quaternion, Raycaster, Vector3 } from "three";
+import { useBrickList } from "@/app/context/brickListContext";
 
 const BrickList: React.FC = () => {
     const robot = useContext(RobotContext);
     const scale = 0.15;
     const [waitTime, setWaitTime] = useState(1000);
-    const [brickList, setBrickList] = useState<CodeBrickProps[]>([]);
+    const { brickList, setBrickList, 
+            addCodeBrick, brick2Swap, 
+            setBrick2Swap, swapBricks,
+            startStop, setStartStop } = useBrickList();
     const [nextBrickIndex, setNextBrickIndex] = useState(0);
-    const [startStop, setStartStop] = useState(false);
     const { controllers } = useXR();
     const [buttonPressed, setButtonPressed] = React.useState(false);
     const posRef = useRef(new Vector3(0, 0, 0));
     const rotRef = useRef(new Quaternion(0, 0, 0, 1));
+    const [listOnCamera, setListOnCamera] = useState(true);
 
     const brickRefs = useRef<(Mesh | null)[]>([]);
     const [previousIntersectedBrick, setPreviousIntersectedBrick] = useState<Mesh | null>(null);
-    const [brick2Swap, setBrick2Swap] = useState<number[]>([]);
 
     const rightController = useController('right');
     const raycaster = new Raycaster();
@@ -30,18 +33,25 @@ const BrickList: React.FC = () => {
     const groupRef = useRef<Mesh | null>(null); // Create a ref for the group
     const { camera } = useThree(); // Get the camera from the Three.js context
     const [buttonLock, setButtonLock] = useState(false);
-    //make the bricklist aways face the camera
+    const [buttonLock2, setButtonLock2] = useState(false);
+
+    //make the bricklist aways face the camera and postiion the bricklist in front of the camera or controller
     useFrame(() => {
         if (groupRef.current) {
             if (controllers && controllers[1]) {
                 const controller = controllers[1];
                 const controllerPosition = new Vector3();
                 controller.controller.getWorldPosition(controllerPosition);
-                groupRef.current.position.set(
-                    controllerPosition.x,
-                    controllerPosition.y + (((brickList.length * scale ** 4) / (3.7 ))) - 0.01, // Adjust the y-coordinate here
-                    controllerPosition.z
-                );
+                if (!listOnCamera) { 
+                    groupRef.current.position.set(
+                        controllerPosition.x,
+                        controllerPosition.y + (((brickList.length * scale ** 4) / (3.7 ))) - 0.01, // Adjust the y-coordinate here
+                        controllerPosition.z
+                    );
+                }
+                else {
+                    groupRef.current.position.set(camera.position.x-0.5 , camera.position.y, camera.position.z-0.5)
+                }
                 groupRef.current.lookAt(
                     new Vector3(
                         camera.position.x,
@@ -49,6 +59,19 @@ const BrickList: React.FC = () => {
                         camera.position.z
                     )
                 );
+            }
+            if (controllers && controllers[1]) {
+                const gamepad = controllers[1].inputSource?.gamepad;
+                if (gamepad) {
+                    if (gamepad.buttons[1].pressed && !buttonLock2) {
+                        setButtonLock2(true);
+                        console.log("Button 2 pressed");
+                        setListOnCamera((prev) => !prev);
+                    } 
+                    if (gamepad.buttons[1].value === 0) {
+                        setButtonLock2(false);
+                    }
+                }
             }
         }
     });
@@ -69,15 +92,11 @@ const BrickList: React.FC = () => {
         }
     });
 
-    //for test
     useEffect(() => {
         setBrickList([
-            foward,
-            right,
-            jump,
-            left,
-            backward,
+            // foward,
             // jump,
+            // backward
 
         ]);
     }, []);
@@ -90,18 +109,6 @@ const BrickList: React.FC = () => {
         brick.activated = false;
         await new Promise((resolve) => setTimeout(resolve, waitTime));
         setNextBrickIndex((prev) => prev + 1);
-    };
-
-    const swapBricks = (index1: number, index2: number) => {
-        setBrickList((prevBrickList) => {
-            const length = prevBrickList.length;
-            const reverseIndex1 = length - 1 - index1;
-            const reverseIndex2 = length - 1 - index2;
-            console.log("Swapping bricks", prevBrickList[reverseIndex1], prevBrickList[reverseIndex2]);
-            const newBrickList = [...prevBrickList];
-            [newBrickList[reverseIndex1], newBrickList[reverseIndex2]] = [newBrickList[reverseIndex2], newBrickList[reverseIndex1]];
-            return newBrickList;
-        });
     };
 
     // Execute the next brick if the state is in "start" button is pressed
@@ -132,6 +139,7 @@ const BrickList: React.FC = () => {
         }
     }, [brick2Swap]);
 
+    // Interact with the bricks by pointing at them with the controller
     useFrame(() => {
         if (rightController) {
             const controller = controllers[0];
@@ -162,13 +170,13 @@ const BrickList: React.FC = () => {
                 const intersectedBrick = intersects[0].object as Mesh;
                 if (intersectedBrick.name === "Text"){
                     intersectedBrick.scale.set(1.5, 1.5, 1.5);
-                    intersectedBrick.parent.scale.set(1.5, 1.5, 1.5);
+                    intersectedBrick.parent?.scale.set(1.5, 1.5, 1.5);
                     const intersectedBrickIndex = intersectedBrick.userData.id;
                   
                     // Reset the scale of the previously intersected brick if it's different
                     if (previousIntersectedBrick && previousIntersectedBrick !== intersectedBrick) {
                         previousIntersectedBrick.scale.set(1, 1, 1);
-                        previousIntersectedBrick.parent.scale.set(1, 1, 1);
+                        previousIntersectedBrick.parent?.scale.set(1, 1, 1);
                     }
     
                     setPreviousIntersectedBrick(intersectedBrick);
@@ -196,7 +204,7 @@ const BrickList: React.FC = () => {
                 // Reset the scale of the previously intersected brick if there are no intersections
                 if (previousIntersectedBrick) {
                     previousIntersectedBrick.scale.set(1, 1, 1);
-                    previousIntersectedBrick.parent.scale.set(1, 1, 1);
+                    previousIntersectedBrick.parent?.scale.set(1, 1, 1);
                     setPreviousIntersectedBrick(null);
                 }
             }
@@ -206,6 +214,14 @@ const BrickList: React.FC = () => {
     return (
         <mesh ref={groupRef} scale={scale}>
             <group position={[0, 1, 0]}>
+                <CodeBrick
+                    index={9999998}
+                    color="white"
+                    label="Start"
+                    activated={false}
+                    execute={() => {}}
+                    position={[0, brickList.length / 3.7, 0]}
+                />
                 {[...brickList].reverse().map((brick, index) => (
                     <CodeBrick
                         index={index}
