@@ -16,7 +16,7 @@ export default function Home() {
       </h1>
       <VRDiv />
 
-      <div className="flex flex-col items-center">
+      <div className="flex flex-col items-center backdrop-blur-md">
         <header className="pb-36">
           <h2 className="text-2xl font-bold">Welcome to VR Playcode!</h2>
 
