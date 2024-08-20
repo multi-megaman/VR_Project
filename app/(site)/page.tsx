@@ -17,13 +17,13 @@ export default function Home() {
       <VRDiv />
 
       <div className="flex flex-col items-center backdrop-blur-md">
-        <header className="pb-36">
+        <header className="pb-12">
           <h2 className="text-2xl font-bold">Welcome to VR Playcode!</h2>
 
           <p>How to play (Using a Meta Quest 3):</p>
         </header>
 
-        <div className="flex flex-row flex-wrap justify-center gap-3">
+        <div className="flex flex-row flex-wrap justify-center gap-3 gap-y-24">
           <TutorialDiv
             imagePath="tutorial/tutorial_1.png"
             text="Step 1: Select one of the experiences above and put on your VR headset."
